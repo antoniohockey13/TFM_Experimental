@@ -18,26 +18,18 @@ def main(inputfiles):
     """
     input_name = inputfiles[0].split('/')
     try:
-        os.mkdir("Data")
+        os.mkdir("Root_files")
     except FileExistsError:
         pass
     try:
-        os.mkdir(f"Data/{input_name[1]}")
-    except FileExistsError:
-        pass
-    try:
-        os.mkdir(f"Data/{input_name[1]}/{input_name[2]}")
+        os.mkdir(f"Root_files/{input_name[1]}")
     except FileExistsError:
         pass
 
     folder = inputfiles[0].split('/')[1:3]
     folder = f"{folder[0]}/{folder[1]}"
-    try:
-        os.mkdir(f"Data/{folder}")
-    except FileExistsError:
-        pass
 
-    hits = ROOT.TFile(f"Data/{folder}/hits.root", "RECREATE")
+    hits = ROOT.TFile(f"Root_files/{folder}.root", "RECREATE")
     hits_tree = ROOT.TTree("Hits", "Hits")
     col = ROOT.vector('int')()
     row = ROOT.vector('int')()
@@ -65,6 +57,7 @@ def main(inputfiles):
                     cal.push_back(ical)
                     toa_cal.push_back(itoa_cal)
                     tot_cal.push_back(itot_cal)
+
     hits_tree.Branch("col", col)
     hits_tree.Branch("row", row)
     hits_tree.Branch("toa_code", toa_code)
@@ -73,7 +66,9 @@ def main(inputfiles):
     hits_tree.Branch("toa_cal", toa_cal)
     hits_tree.Branch("tot_cal", tot_cal)
 
+    hits_tree.Fill()
     hits_tree.Write()
+    hits.Write()
     hits.Close()
 
 if __name__ == '__main__':

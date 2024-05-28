@@ -32,10 +32,10 @@ def main(inputfiles):
 
     hits = ROOT.TFile(f"Root_files/{folder}.root", "RECREATE")
     col = array('i', [0])
-    row = array('b', [0])
-    toa_code = array('b', [0])
-    tot_code = array('b', [0])
-    cal = array('b', [0])
+    row = array('i', [0])
+    toa_code = array('i', [0])
+    tot_code = array('i', [0])
+    cal = array('i', [0])
     toa_cal = array('f', [0])
     tot_cal = array('f', [0])
 
@@ -54,11 +54,10 @@ def main(inputfiles):
             for l in lines:
                 if l[0] == 'D':
                     _, _, _, icol, irow, itoa_code, itot_code, ical = l.strip().split()
-                    col, row, toa_code, tot_code, cal = int(icol), int(irow), int(itoa_code), int(itot_code), int(ical)+1
-                    print(col)
-                    t_bin = T3 / cal
-                    tot_cal = ((2 * tot_code - math.floor(tot_code / 32)) * t_bin)
-                    toa_cal = (t_bin * toa_code)
+                    col[0], row[0], toa_code[0], tot_code[0], cal[0] = int(icol), int(irow), int(itoa_code), int(itot_code), int(ical)+1
+                    t_bin = T3 / cal[0]
+                    tot_cal[0] = ((2 * tot_code[0] - math.floor(tot_code[0] / 32)) * t_bin)
+                    toa_cal[0] = (t_bin * toa_code[0])
                     hits_tree.Fill()
     hits_tree.Write()
     hits.Write()

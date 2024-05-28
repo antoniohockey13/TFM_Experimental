@@ -19,7 +19,7 @@ def main(inputfiles):
         input_name[-1] = input_name[-1].split('.')[0]
         folder = "/".join(input_name[1:-1])
         os.makedirs(f"Pictures/{folder}", exist_ok=True)
-    # Functios to do the plots
+    # Functions to do the plots
     def plot_hit_map(canvas_name, title, file_name, cut=""):
         c = ROOT.TCanvas(canvas_name, canvas_name)
         file.Hits.Draw("col:row>>hit_map(16,0,16,16,0,16)", cut,"colz")
@@ -35,9 +35,9 @@ def main(inputfiles):
         
     def plot_tot_code(canvas_name, title, file_name, cut=""):
         c = ROOT.TCanvas(canvas_name, canvas_name)
-        file.Hits.Draw("ToT>>tot_code(512,0,511)", cut,"")
+        file.Hits.Draw("tot_code>>tot_code(512,0,511)", cut,"")
         tot_code = ROOT.gDirectory.Get("tot_code")
-        tot_code.SetTitle(title)
+        # tot_code.SetTitle(title)
         tot_code.GetXaxis().SetTitle("ToT/code")
         tot_code.GetYaxis().SetTitle("Entries")
         c.Draw()
@@ -48,7 +48,7 @@ def main(inputfiles):
 
     def plot_tot_calibrated(canvas_name, title, file_name, cut=""):
         c = ROOT.TCanvas(canvas_name, canvas_name)
-        file.Hits.Draw("ToT>>tot_calibrated(500,0,25)", cut,"")
+        file.Hits.Draw("tot_cal>>tot_calibrated(250,0,25)", cut,"")
         tot_calibrated = ROOT.gDirectory.Get("tot_calibrated")
         tot_calibrated.SetTitle(title)
         tot_calibrated.GetXaxis().SetTitle("ToT/ns")
@@ -61,7 +61,7 @@ def main(inputfiles):
 
     def plot_toa_code(canvas_name, title, file_name, cut=""):
         c = ROOT.TCanvas(canvas_name, canvas_name)
-        file.Hits.Draw("ToA>>toa_code(1025,0,1024)", cut,"")
+        file.Hits.Draw("toa_code>>toa_code(1025,0,1024)", cut,"")
         toa_code = ROOT.gDirectory.Get("toa_code")
         toa_code.SetTitle(title)
         toa_code.GetXaxis().SetTitle("ToA/code")
@@ -74,7 +74,7 @@ def main(inputfiles):
     
     def plot_toa_calibrated(canvas_name, title, file_name, cut=""):
         c = ROOT.TCanvas(canvas_name, canvas_name)
-        file.Hits.Draw("ToA>>toa_calibrated(500,0,14)", cut,"")
+        file.Hits.Draw("toa_cal>>toa_calibrated(500,0,14)", cut,"")
         toa_calibrated = ROOT.gDirectory.Get("toa_calibrated")
         toa_calibrated.SetTitle(title)
         toa_calibrated.GetXaxis().SetTitle("ToA/ns")
@@ -84,6 +84,7 @@ def main(inputfiles):
             c.SaveAs(f"Pictures/{folder}/{file_name}{FORMAT}")
         if not omit_plots:
             input("Press Enter to continue...")
+
     def plot_cal(canvas_name, title, file_name, cut=""):
         c = ROOT.TCanvas(canvas_name, canvas_name)
         file.Hits.Draw("cal>>cal(1024,1,1024)", cut,"")
@@ -97,13 +98,29 @@ def main(inputfiles):
         if not omit_plots:
             input("Press Enter to continue...")
         max_bin = cal.GetMaximumBin()
-        max_bin_value = cal.GetBinValue(max_bin)
-        return max_bin_value
+        return max_bin
+    
             
     for inputfile in inputfiles:
         file = ROOT.TFile(inputfile)
 
         # Plot functions
+        plot_hit_map("hit_map", f"Hit Map {inputfile}", f"{inputfile}_hit_map")
+        max_bin = []
+        for i in range(6,10):
+            max_bin.append(plot_cal(f"cal{i}", f"Calibration {i}", f"{inputfile}_cal_row_{i}", f"row == {i}"))
+        print(max_bin)
+        for i in range(6,10):
+            plot_tot_code(f"tot_code{i}", f"ToT Code {i}", f"{inputfile}_tot_code_row_{i}", f"row == {i}")
+        for i in range(6,10):
+            if len(max_bin) == 0:
+                plot_tot_calibrated(f"tot_calibrated{i}", f"ToT Calibrated {i}", f"{inputfile}_tot_calibrated_row_{i}", f"row == {i}")
+            else:
+                plot_tot_calibrated(f"tot_calibrated{i}", f"ToT Calibrated {i}", f"{inputfile}_tot_calibrated_row_{i}", f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+        for i in range(6,10):    
+            plot_toa_code(f"toa_code{i}", f"ToA Code {i}", f"{inputfile}_toa_code_row_{i}", f"abs(cal-{max_bin[i-6]})<1.5 && row == {i}")
+        for i in range(6,10):    
+            plot_toa_calibrated(f"toa_calibrated{i}", f"ToA Calibrated {i}", f"{inputfile}_toa_calibrated_row_{i}", f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
 
         file.Close()
 

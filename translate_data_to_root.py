@@ -54,11 +54,17 @@ def main(inputfiles):
             for l in lines:
                 if l[0] == 'D':
                     _, _, _, icol, irow, itoa_code, itot_code, ical = l.strip().split()
-                    col[0], row[0], toa_code[0], tot_code[0], cal[0] = int(icol), int(irow), int(itoa_code), int(itot_code), int(ical)+1
-                    t_bin = T3 / cal[0]
-                    tot_cal[0] = ((2 * tot_code[0] - math.floor(tot_code[0] / 32)) * t_bin)
-                    toa_cal[0] = (t_bin * toa_code[0])
-                    hits_tree.Fill()
+                    icol, irow, itoa_code, itot_code, ical = int(icol), int(irow), int(itoa_code), int(itot_code), int(ical)
+                    if ical != 0:
+                        col[0] = icol
+                        row[0] = irow
+                        toa_code[0] = itoa_code
+                        tot_code[0] = itot_code
+                        cal[0] = ical
+                        t_bin = T3 / cal[0]
+                        tot_cal[0] = ((2 * tot_code[0] - math.floor(tot_code[0] / 32)) * t_bin)
+                        toa_cal[0] = (t_bin * toa_code[0])
+                        hits_tree.Fill()
     hits_tree.Write()
     hits.Write()
     hits.Close()

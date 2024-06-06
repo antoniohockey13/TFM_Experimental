@@ -5,7 +5,7 @@ import os
 # CONSTANTS
 FORMAT = ".pdf"
 save_plots = True
-omit_plots = True
+omit_plots = False
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
 ROOT.gStyle.SetOptStat(0)
@@ -51,7 +51,7 @@ def plot_tot_calibrated(file, canvas_name, title, file_name, folder, cut=""):
 def plot_tot_calibrated_full(file, canvas_name, title, file_name, folder, cut=""):
     c = ROOT.TCanvas(canvas_name, canvas_name)
     c.SetLogy()
-    file.Hits.Draw("tot_cal>>tot_calibrated(500,0,25)", cut,"")
+    file.Hits.Draw("tot_cal>>tot_calibrated(500,0,20)", cut,"")
     tot_calibrated = ROOT.gDirectory.Get("tot_calibrated")
     tot_calibrated.SetTitle(title)
     tot_calibrated.GetXaxis().SetTitle("ToT/ns")
@@ -77,7 +77,7 @@ def plot_toa_code(file, canvas_name, title, file_name, folder, cut=""):
 
 def plot_toa_calibrated(file, canvas_name, title, file_name, folder, cut=""):
     c = ROOT.TCanvas(canvas_name, canvas_name)
-    file.Hits.Draw("toa_cal>>toa_calibrated(500,0,14)", cut,"")
+    file.Hits.Draw("toa_cal>>toa_calibrated(125,0,14)", cut,"")
     toa_calibrated = ROOT.gDirectory.Get("toa_calibrated")
     toa_calibrated.SetTitle(title)
     toa_calibrated.GetXaxis().SetTitle("ToA/ns")
@@ -97,10 +97,10 @@ def plot_cal(file, canvas_name, title, file_name, folder, cut=""):
     cal.GetYaxis().SetTitle("Entries")
     c.SetLogy()
     c.Draw()
-    if save_plots:
-        c.SaveAs(f"Pictures/{folder}/{file_name}{FORMAT}")
-    if not omit_plots:
-        input("Press Enter to continue...")
+    # if save_plots:
+        # c.SaveAs(f"Pictures/{folder}/{file_name}{FORMAT}")
+    # if not omit_plots:
+        # input("Press Enter to continue...")
     max_bin = cal.GetMaximumBin()
     return max_bin
 
@@ -140,12 +140,13 @@ def main(inputfiles):
         # for i in range(6,10):
         #     plot_tot_code(file, f"tot_code{i}", f"ToT Code {i}", f"tot_code_row_{i}", folder, f"row == {i}")
         for i in range(6,10):
-            plot_tot_calibrated(file, f"tot_calibrated{i}", f"ToT Calibrated {i}", f"tot_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
-            # plot_tot_calibrated_full(file, f"tot_calibrated_full{i}", f"ToT Calibrated Full {i}", f"tot_calibrated_full_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+            # plot_tot_calibrated(file, f"tot_calibrated{i}", f"ToT Calibrated {i}", f"tot_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+            plot_tot_calibrated_full(file, f"tot_calibrated_full{i}", f"ToT Calibrated Full {i}", f"tot_calibrated_full_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
         # for i in range(6,10):    
         #     plot_toa_code(file, f"toa_code{i}", f"ToA Code {i}", f"toa_code_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<1.5 && row == {i}")
-        # for i in range(6,10):    
-            # plot_toa_calibrated(file, f"toa_calibrated{i}", f"ToA Calibrated {i}", f"toa_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+        for i in range(6,10):    
+            plot_toa_calibrated(file, f"toa_calibrated{i}", f"ToA Calibrated {i}", f"toa_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+            plot_toa_calibrated(file, f"toa_calibrated{i}", f"ToA Calibrated Inversed {i}", f"toa_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})>2.5 && row == {i}")
         # for i in range(6,10):
             # plot_tot_toa(file, f"tot_toa{i}", f"ToT vs ToA {i}", f"tot_toa_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
 

@@ -6,11 +6,12 @@ import numpy as np
 import matplotlib.pyplot as plt
 
 # CONSTANTS
-FORMAT = ".png"
-save_plots = False
+FORMAT = "pdf"
+save_plots = True
 omit_plots = False
 ROOT.gROOT.SetBatch(omit_plots)
-ROOT.gStyle.SetOptStat(111111)
+# ROOT.gStyle.SetOptStat(111111)
+ROOT.gStyle.SetOptStat(0)
 
 def get_cal(file, cut=""):
     cal = ROOT.TH1F("calibration", "", 1024, 1, 1024)
@@ -28,21 +29,23 @@ def getMedian(histo1):
 @click.argument('inputfiles', nargs=-1)
 def main(inputfiles):
     if save_plots:
-        input_name = inputfile.split('/')
+        input_name = inputfiles[0].split('/')
         input_name[-1] = input_name[-1].split('.')[0]
         folder = "/".join(input_name[1:-1])
         os.makedirs(f"Pictures/{folder}", exist_ok=True)
     
     mean = {}
+    mean_error = {}
     median = {}
     mode = {}
-    voltages_kV = [5,10,15,20,25,30,35]    
+    voltages_kV = [10,15,20,25,30,35]    
 
     for irow in range(6,10):
         c = ROOT.TCanvas(f"c{irow}", f"c{irow}")
-        legend = ROOT.TLegend(0.1,0.7,0.48,0.9)
+        legend = ROOT.TLegend(0.6,0.7,0.9,0.9)
         tot_calibrated = []
         mean[irow] = []
+        mean_error[irow] = []
         median[irow] = []
         mode[irow] = []
         
@@ -60,26 +63,28 @@ def main(inputfiles):
             tot_calibrated[-1].SetDirectory(0) 
             # Statistics values
             mean[irow].append(tot_calibrated[-1].GetMean())
+            mean_error[irow].append(tot_calibrated[-1].GetMeanError())
             median[irow].append(getMedian(tot_calibrated[-1]))
             mode[irow].append(tot_calibrated[-1].GetBinCenter(tot_calibrated[-1].GetMaximumBin()))
             # Plot
             tot_calibrated[-1].SetTitle("ToT Calibrated for Different Voltages")
             tot_calibrated[-1].GetXaxis().SetTitle("ToT/ns")
             tot_calibrated[-1].GetYaxis().SetTitle("Entries")
-            legend.AddEntry(tot_calibrated[-1], f"{inputfile}", "l")
+            legend.AddEntry(tot_calibrated[-1], f"V = {voltages_kV[i]}kV", "l")
             tot_calibrated[-1].SetLineColor(i+1)
             tot_calibrated[-1].DrawNormalized(f"HIST {opt}")
             file.Close()
-
+        tot_calibrated[0].GetYaxis().SetRangeUser(0, 0.2)
+        c.Update()
         legend.Draw()
         if save_plots:
             c.SaveAs(f"Pictures/{folder}/tot_calibrated_for_different_kV_row_{irow}.{FORMAT}")
-        # if not omit_plots:
-            # input("Press Enter to continue...")
+        if not omit_plots:
+            input("Press Enter to continue...")
         
     for i in range(6,10):
-        plt.plot(voltages_kV, mean[i], 'o-', label=f"Col {i}")
-    plt.xlabel('Voltage [V]')
+        plt.errorbar(voltages_kV, mean[i], yerr=mean_error[i], fmt='.', label=f"Col {i}")
+    plt.xlabel('Voltage [KV]')
     plt.ylabel('ToT/ns')
     plt.title('Mean')
     plt.legend()
@@ -88,8 +93,8 @@ def main(inputfiles):
         plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_{i}.{FORMAT}")
 
     for i in range(6,10):        
-        plt.plot(voltages_kV, median[i], 'o-', label=f"Col {i}")
-    plt.xlabel('Voltage [V]')
+        plt.plot(voltages_kV, median[i], '.', label=f"Col {i}")
+    plt.xlabel('Voltage [KV]')
     plt.ylabel('ToT/ns')
     plt.title('Median')
     plt.legend()
@@ -98,8 +103,8 @@ def main(inputfiles):
         plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_{i}.{FORMAT}")
 
     for i in range(6,10):
-        plt.plot(voltages_kV, mode[i], 'o-', label=f"Col {i}")
-    plt.xlabel('Voltage [V]')
+        plt.plot(voltages_kV, mode[i], '.', label=f"Col {i}")
+    plt.xlabel('Voltage [KV]')
     plt.ylabel('ToT/ns')
     plt.title('Mode')
     plt.legend()

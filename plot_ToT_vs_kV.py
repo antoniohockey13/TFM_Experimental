@@ -2,9 +2,10 @@ import ROOT
 import click
 import os
 import numpy as np
-import numpy as np
+import sifca_utils 
 import matplotlib.pyplot as plt
 
+sifca_utils.plotting.set_sifca_style()
 # CONSTANTS
 FORMAT = "pdf"
 save_plots = True

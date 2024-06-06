@@ -9,7 +9,7 @@ sifca_utils.plotting.set_sifca_style()
 # CONSTANTS
 FORMAT = "pdf"
 save_plots = True
-omit_plots = False
+omit_plots = True
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
 ROOT.gStyle.SetOptStat(0)
@@ -49,14 +49,14 @@ def main(inputfiles):
         mean_error[irow] = []
         median[irow] = []
         mode[irow] = []
+
+        tot_calibrated.append(ROOT.TH2F(f"tot_calibrated", "", 1, 0, 10, 1, 0, 0.1))
+        tot_calibrated[-1].Draw()
         
         for i, inputfile in enumerate(reversed(inputfiles)):
             file = ROOT.TFile(inputfile)
             max_bin_value = get_cal(file, f"row=={irow}")
-            if i == 0:
-                opt = ""
-            if i > 0:
-                opt = "same"
+            opt = "same"
             file.Hits.SetLineColor(i+1)
             # Change limits
             tot_calibrated.append(ROOT.TH1F(f"tot_calibrated_{i}", "", 100, 0, 10)) 
@@ -75,7 +75,6 @@ def main(inputfiles):
             tot_calibrated[-1].SetLineColor(i+1)
             tot_calibrated[-1].DrawNormalized(f"HIST {opt}")
             file.Close()
-        tot_calibrated[0].GetYaxis().SetRangeUser(0, 0.2)
         c.Update()
         legend.Draw()
         if save_plots:
@@ -89,9 +88,10 @@ def main(inputfiles):
     plt.ylabel('ToT/ns')
     plt.title('Mean')
     plt.legend()
-    plt.show()
+    if not omit_plots:
+        plt.show()
     if save_plots:
-        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_{i}.{FORMAT}")
+        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Mean.png")
 
     for i in range(6,10):        
         plt.plot(voltages_kV, median[i], '.', label=f"Col {i}")
@@ -99,9 +99,10 @@ def main(inputfiles):
     plt.ylabel('ToT/ns')
     plt.title('Median')
     plt.legend()
-    plt.show()
+    if not omit_plots:
+        plt.show()
     if save_plots:
-        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_{i}.{FORMAT}")
+        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Median.png")
 
     for i in range(6,10):
         plt.plot(voltages_kV, mode[i], '.', label=f"Col {i}")
@@ -109,9 +110,10 @@ def main(inputfiles):
     plt.ylabel('ToT/ns')
     plt.title('Mode')
     plt.legend()
-    plt.show()
+    if not omit_plots:
+        plt.show()
     if save_plots:
-        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_{i}.{FORMAT}")
+        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Mode.png")
 
 
 

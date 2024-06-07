@@ -83,7 +83,7 @@ def main(inputfiles):
             input("Press Enter to continue...")
         
     for i in range(6,10):
-        plt.errorbar(voltages_kV, mean[i], yerr=mean_error[i], fmt='.', label=f"Col {i}")
+        plt.errorbar(voltages_kV, mean[i], yerr=mean_error[i], fmt='.', label=f"Row {i}")
     plt.xlabel('Voltage [KV]')
     plt.ylabel('ToT/ns')
     plt.title('Mean')
@@ -94,7 +94,7 @@ def main(inputfiles):
         plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Mean.png")
 
     for i in range(6,10):        
-        plt.plot(voltages_kV, median[i], '.', label=f"Col {i}")
+        plt.plot(voltages_kV, median[i], '.', label=f"Row {i}")
     plt.xlabel('Voltage [KV]')
     plt.ylabel('ToT/ns')
     plt.title('Median')
@@ -105,7 +105,7 @@ def main(inputfiles):
         plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Median.png")
 
     for i in range(6,10):
-        plt.plot(voltages_kV, mode[i], '.', label=f"Col {i}")
+        plt.plot(voltages_kV, mode[i], '.', label=f"Row {i}")
     plt.xlabel('Voltage [KV]')
     plt.ylabel('ToT/ns')
     plt.title('Mode')

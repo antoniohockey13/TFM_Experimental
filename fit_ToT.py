@@ -5,13 +5,14 @@ import click
 import os
 import matplotlib.pyplot as plt
 import numpy as np
+from array import array
 
 sifca_utils.plotting.set_sifca_style()
 
 #CONSTANTS
 FORMAT = ".pdf"
-save_plots = False
-omit_plots = True 
+save_plots = True
+omit_plots = True
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
 ROOT.gStyle.SetOptStat(0)
@@ -43,8 +44,6 @@ def tot_fit_histogram(file, canvas_name, cut, V, file_name, folder):
     histo.Fit(fit_gaus, "R")
     # fit_gaus.Draw("same")
     max = fit_gaus.GetParameter(1)
-
-######## Cambiar valor de 1.3 para encontrar el óptimo ###########
 
     fit = ROOT.TF1("fit", f"[0]*exp([1]*x+[2])", 1.5*max, 10)
     fit.SetParameter(0, 2e4)
@@ -84,18 +83,16 @@ def tot_fit_gauss(file, canvas_name, cut, file_name, folder, percentage):
     return limit
 
 
-
-
-
 @click.command()
 @click.argument("inputfiles", nargs=-1)
 def main(inputfiles):
     low_value = {}
-    plot_fit = {}
+    error = {}
     V = [35*kV, 30*kV, 25*kV, 20*kV, 15*kV, 10*kV]
 
     for irow in range(6,10):
         low_value[irow] = []
+        error[irow] = []
         for i, file in enumerate(inputfiles):
             folder = ""   
             input_name = file.split('/')
@@ -106,22 +103,52 @@ def main(inputfiles):
 
             f = ROOT.TFile(file)
             max_bin = get_cal(f, f"row=={irow}")
+            # fit to exponential y = A e^(Bx+C)
             fit = tot_fit_histogram(f,f"c_row_{irow}", f"abs({max_bin}-cal)<2.5 && row == {irow}", V[i], f"ToT_fit_row{irow}", folder)
+            # Select max value of ToT when fit = e ^-1
             low_value[irow].append((np.log(fit.GetParameter(0))+fit.GetParameter(2)+1)/-fit.GetParameter(1))
+            # Error calculation
+            dx_da = -1/(fit.GetParameter(0)*fit.GetParameter(1))
+            dx_db = (np.log(fit.GetParameter(0))+fit.GetParameter(2)+1)/(fit.GetParameter(1)**2)
+            dx_dc = -1/(fit.GetParameter(1))
+            error[irow].append(np.sqrt(dx_da**2*fit.GetParError(0)**2 + dx_db**2*fit.GetParError(1)**2 + dx_dc**2*fit.GetParError(2)**2))
+                               
 
-        plt.scatter(V, low_value[irow], label=f"Row {irow}")
 
-        low = np.array(low_value[irow])
-        V = np.array(V)
-        plot_fit[irow] = np.polyfit(V, low, 1)
-        fit_line = np.polyval(plot_fit[irow], V)
-        plt.plot(V, fit_line, label=f"Fit Row {irow}")
-        plt.text(V[0], low[0], f"m = {plot_fit[irow][0]:.2f} b = {plot_fit[irow][1]:.2f}")
+    ROOT.gROOT.SetBatch(False)
+    fit = {}
+    points = {}
+    c_fit = ROOT.TCanvas("c_fit", "c_fit", 800, 600)
+    limits = ROOT.TH2F("limits", "limits", 1, 0, 40,1, 4, 10)
+    limits.Draw()
+    legend = ROOT.TLegend(0.2, 0.7, 0.5, 0.9)
+    colors = [ROOT.kBlack, ROOT.kRed, ROOT.kBlue, ROOT.kOrange]
 
-    plt.xlabel("Voltage/ kV")
-    plt.ylabel("ToT/ns")
-    plt.legend()
-    plt.show()
+    for i, irow in enumerate(range(6, 10)):
+        points[irow] = ROOT.TGraphErrors(len(V), array('d', V), array('d', low_value[irow]), array('d', [0.1]*len(V)), array('d', error[irow]))
+        # points[irow] = ROOT.TGraph(len(V), array('d', V), array('d', low_value[irow]))
+        points[irow].SetMarkerStyle(20)
+        points[irow].SetMarkerSize(1)
+        points[irow].SetMarkerColor(colors[i])
+        points[irow].SetLineColor(colors[i])
+        points[irow].Draw("P") 
+
+        legend.AddEntry(points[irow], f"Row {irow}", "p")
+
+        fit[irow] = ROOT.TF1(f"fit{irow}", "pol1", 0, 40)
+        for idx in range(len(V)):
+            points[irow].SetPointError(idx, 0.1, error[irow][idx])
+        points[irow].Fit(fit[irow], "R")
+        fit[irow].SetLineColor(colors[i])
+        fit[irow].Draw("Same")
+
+    legend.Draw()
+    limits.GetXaxis().SetTitle("Voltage /kV")
+    limits.GetYaxis().SetTitle("Max ToT/ns")
+    c_fit.Update()
+    if save_plots:
+        c_fit.SaveAs(f"Pictures/2024-05-23_Array_Test_Results/MaxTot_V{FORMAT}")
+    input("Press Enter to continue...")
 
 if __name__ == "__main__":
     main()

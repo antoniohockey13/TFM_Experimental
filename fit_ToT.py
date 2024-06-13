@@ -11,8 +11,8 @@ sifca_utils.plotting.set_sifca_style()
 
 #CONSTANTS
 FORMAT = ".pdf"
-save_plots = True
-omit_plots = True
+save_plots = False
+omit_plots = False
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
 ROOT.gStyle.SetOptStat(0)
@@ -25,7 +25,7 @@ kV = 1
 V = 1e-3*kV
 
 def get_cal(file, cut=""):
-    cal = ROOT.TH1F("calibration", "", 1024, 1, 1024)
+    cal = ROOT.TH1F("calibration", "", 1024, 0, 1023)
     file.Hits.Project("calibration", "cal", cut)
     max_bin = cal.GetMaximumBin()
     return max_bin
@@ -47,7 +47,8 @@ def tot_fit_histogram(file, canvas_name, cut, V, file_name, folder):
 
     fit = ROOT.TF1("fit", f"[0]*exp([1]*x+[2])", 1.5*max, 10)
     fit.SetParameter(0, 2e4)
-    fit.SetParameter(1, -3)
+    fit.SetParameter(1, -3)    
+    file.Hits.Project("calibration", "cal", cut)
     fit.SetParameter(2, 15)
     histo.Fit(fit, "RS")
     fit.Draw("same")

@@ -9,13 +9,13 @@ sifca_utils.plotting.set_sifca_style()
 # CONSTANTS
 FORMAT = "pdf"
 save_plots = True
-omit_plots = True
+omit_plots = False
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
 ROOT.gStyle.SetOptStat(0)
 
 def get_cal(file, cut=""):
-    cal = ROOT.TH1F("calibration", "", 1024, 1, 1024)
+    cal = ROOT.TH1F("calibration", "", 1024, 0, 1023)
     file.Hits.Project("calibration", "cal", cut)
     max_bin = cal.GetMaximumBin()
     return max_bin
@@ -39,7 +39,6 @@ def main(inputfiles):
     mean_error = {}
     median = {}
     mode = {}
-    voltages_kV = [10,15,20,25,30,35]    
 
     for irow in range(6,10):
         c = ROOT.TCanvas(f"c{irow}", f"c{irow}")
@@ -50,10 +49,11 @@ def main(inputfiles):
         median[irow] = []
         mode[irow] = []
 
-        tot_calibrated.append(ROOT.TH2F(f"tot_calibrated", "", 1, 0, 10, 1, 0, 0.1))
+        tot_calibrated.append(ROOT.TH2F(f"tot_calibrated", "", 1, 0, 10, 1, 1e-3, 0.1))
         tot_calibrated[-1].Draw()
-        
-        for i, inputfile in enumerate(reversed(inputfiles)):
+        voltages_kV = []
+        for i, inputfile in enumerate((inputfiles)):
+            voltages_kV.append(int(inputfile.split('/')[-1].split('_')[0]))
             file = ROOT.TFile(inputfile)
             max_bin_value = get_cal(file, f"row=={irow}")
             opt = "same"

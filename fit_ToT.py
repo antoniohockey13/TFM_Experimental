@@ -11,7 +11,7 @@ sifca_utils.plotting.set_sifca_style()
 
 #CONSTANTS
 FORMAT = ".pdf"
-save_plots = False
+save_plots = True
 omit_plots = False
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
@@ -89,12 +89,14 @@ def tot_fit_gauss(file, canvas_name, cut, file_name, folder, percentage):
 def main(inputfiles):
     low_value = {}
     error = {}
-    V = [35*kV, 30*kV, 25*kV, 20*kV, 15*kV, 10*kV]
 
     for irow in range(6,10):
         low_value[irow] = []
         error[irow] = []
+        V = []
         for i, file in enumerate(inputfiles):
+            V.append(int(file.split('/')[-1].split("_")[0]))
+            print(f"Voltage: {V[-1]}kV \n Row {irow}")
             folder = ""   
             input_name = file.split('/')
             input_name[-1] = input_name[-1].split('.')[0]
@@ -126,6 +128,7 @@ def main(inputfiles):
     colors = [ROOT.kBlack, ROOT.kRed, ROOT.kBlue, ROOT.kOrange]
 
     for i, irow in enumerate(range(6, 10)):
+        print(f"\n ****************************\n Row {irow}")
         points[irow] = ROOT.TGraphErrors(len(V), array('d', V), array('d', low_value[irow]), array('d', [0.1]*len(V)), array('d', error[irow]))
         # points[irow] = ROOT.TGraph(len(V), array('d', V), array('d', low_value[irow]))
         points[irow].SetMarkerStyle(20)

@@ -11,7 +11,7 @@ import sifca_utils
 # CONSTANTS
 FORMAT = ".pdf"
 save_plots = True
-omit_plots = False
+omit_plots = True
 ROOT.gROOT.SetBatch(omit_plots)
 ROOT.gStyle.SetOptStat(111111)
 # ROOT.gStyle.SetOptStat(0)

@@ -9,7 +9,7 @@ sifca_utils.plotting.set_sifca_style()
 # CONSTANTS
 FORMAT = "pdf"
 save_plots = True
-omit_plots = False
+omit_plots = True 
 ROOT.gROOT.SetBatch(omit_plots)
 # ROOT.gStyle.SetOptStat(111111)
 ROOT.gStyle.SetOptStat(0)
@@ -35,21 +35,23 @@ def main(inputfiles):
         folder = "/".join(input_name[1:-1])
         os.makedirs(f"Pictures/{folder}", exist_ok=True)
     
-    mean = {}
-    mean_error = {}
-    median = {}
-    mode = {}
+    # mean = {}
+    # mean_error = {}
+    # median = {}
+    # mode = {}
 
     for irow in range(6,10):
         c = ROOT.TCanvas(f"c{irow}", f"c{irow}")
         legend = ROOT.TLegend(0.6,0.7,0.9,0.9)
         tot_calibrated = []
-        mean[irow] = []
-        mean_error[irow] = []
-        median[irow] = []
-        mode[irow] = []
+        # mean[irow] = []
+        # mean_error[irow] = []
+        # median[irow] = []
+        # mode[irow] = []
 
-        tot_calibrated.append(ROOT.TH2F(f"tot_calibrated", "", 1, 0, 10, 1, 1e-3, 0.1))
+        tot_calibrated.append(ROOT.TH2F(f"tot_calibrated", "", 1, 0, 8, 1, 1e-3, 0.1))
+        tot_calibrated[-1].GetXaxis().SetTitle("ToT/ns")
+        tot_calibrated[-1].GetYaxis().SetTitle("Entries")
         tot_calibrated[-1].Draw()
         voltages_kV = []
         for i, inputfile in enumerate((inputfiles)):
@@ -59,19 +61,20 @@ def main(inputfiles):
             opt = "same"
             file.Hits.SetLineColor(i+1)
             # Change limits
-            tot_calibrated.append(ROOT.TH1F(f"tot_calibrated_{i}", "", 100, 0, 10)) 
+            tot_calibrated.append(ROOT.TH1F(f"tot_calibrated_{i}", "", 80, 0, 8)) 
             file.Hits.Project(f"tot_calibrated_{i}", "tot_cal", f"row == {irow} && cal-{max_bin_value}<2.5")
             tot_calibrated[-1].SetDirectory(0) 
             # Statistics values
-            mean[irow].append(tot_calibrated[-1].GetMean())
-            mean_error[irow].append(tot_calibrated[-1].GetMeanError())
-            median[irow].append(getMedian(tot_calibrated[-1]))
-            mode[irow].append(tot_calibrated[-1].GetBinCenter(tot_calibrated[-1].GetMaximumBin()))
+            # mean[irow].append(tot_calibrated[-1].GetMean())
+            # mean_error[irow].append(tot_calibrated[-1].GetMeanError())
+            # median[irow].append(getMedian(tot_calibrated[-1]))
+            # mode[irow].append(tot_calibrated[-1].GetBinCenter(tot_calibrated[-1].GetMaximumBin()))
             # Plot
             tot_calibrated[-1].SetTitle("ToT Calibrated for Different Voltages")
             tot_calibrated[-1].GetXaxis().SetTitle("ToT/ns")
             tot_calibrated[-1].GetYaxis().SetTitle("Entries")
-            legend.AddEntry(tot_calibrated[-1], f"V = {voltages_kV[i]}kV", "l")
+            # legend.AddEntry(tot_calibrated[-1], f"V = {voltages_kV[i]}kV", "l")
+            legend.AddEntry(tot_calibrated[-1], f"V = {voltages_kV[i]:.1f} \pm 0.1 kV", "l")
             tot_calibrated[-1].SetLineColor(i+1)
             tot_calibrated[-1].DrawNormalized(f"HIST {opt}")
             file.Close()
@@ -82,38 +85,38 @@ def main(inputfiles):
         if not omit_plots:
             input("Press Enter to continue...")
         
-    for i in range(6,10):
-        plt.errorbar(voltages_kV, mean[i], yerr=mean_error[i], fmt='.', label=f"Row {i}")
-    plt.xlabel('Voltage [KV]')
-    plt.ylabel('ToT/ns')
-    plt.title('Mean')
-    plt.legend()
-    if not omit_plots:
-        plt.show()
-    if save_plots:
-        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Mean.png")
+    # for i in range(6,10):
+    #     plt.errorbar(voltages_kV, mean[i], yerr=mean_error[i], fmt='.', label=f"Row {i}")
+    # plt.xlabel('Voltage [KV]')
+    # plt.ylabel('ToT/ns')
+    # plt.title('Mean')
+    # plt.legend()
+    # if not omit_plots:
+    #     plt.show()
+    # if save_plots:
+    #     plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Mean.png")
 
-    for i in range(6,10):        
-        plt.plot(voltages_kV, median[i], '.', label=f"Row {i}")
-    plt.xlabel('Voltage [KV]')
-    plt.ylabel('ToT/ns')
-    plt.title('Median')
-    plt.legend()
-    if not omit_plots:
-        plt.show()
-    if save_plots:
-        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Median.png")
+    # for i in range(6,10):        
+    #     plt.plot(voltages_kV, median[i], '.', label=f"Row {i}")
+    # plt.xlabel('Voltage [KV]')
+    # plt.ylabel('ToT/ns')
+    # plt.title('Median')
+    # plt.legend()
+    # if not omit_plots:
+    #     plt.show()
+    # if save_plots:
+    #     plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Col_Median.png")
 
-    for i in range(6,10):
-        plt.plot(voltages_kV, mode[i], '.', label=f"Row {i}")
-    plt.xlabel('Voltage [KV]')
-    plt.ylabel('ToT/ns')
-    plt.title('Mode')
-    plt.legend()
-    if not omit_plots:
-        plt.show()
-    if save_plots:
-        plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Mode.png")
+    # for i in range(6,10):
+    #     plt.plot(voltages_kV, mode[i], '.', label=f"Row {i}")
+    # plt.xlabel('Voltage [KV]')
+    # plt.ylabel('ToT/ns')
+    # plt.title('Mode')
+    # plt.legend()
+    # if not omit_plots:
+    #     plt.show()
+    # if save_plots:
+    #     plt.savefig(f"Pictures/{folder}/Voltage_vs_ToT_Mode.png")
 
 
 

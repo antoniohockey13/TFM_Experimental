@@ -51,7 +51,6 @@ def main(inputfiles):
         c.Draw()
         opt = "same"
         for i, irow in enumerate(range(6, 10)):
-             
             file.Hits.SetLineColor(colors[i])
             
             tot_calibrated.append(ROOT.TH1F(f"tot_calibrated_{i}", "", 75, 0, 10))

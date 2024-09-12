@@ -53,16 +53,16 @@ def main(inputfiles):
     tot_vs_toa = {}
     # Create a 2D histogram for the hit map with 16x16 pixels
     hit_map = ROOT.TH2F("hits", "Hit Map;Column;Row", 16, 0, 16, 16, 0, 16)
-    for i in range(7):
-        toas_vs_cal[i] = ROOT.TH2F(f"ToA_vs_Cal{i}", f"Time of Arrival vs Calibration {i};ToA;Cal", 500, 0, 15, 1024, 1, 1024)
-        tot_vs_toa[i] = ROOT.TH2F(f"ToT_vs_ToA{i}", f"Time over Threshold vs Time of Arrival {i};ToT;ToA", 500, 0, 15, 500, 0, 25)
-        tots_code[i] = ROOT.TH1F(f"ToT_code{i}", f"Time over Threshold {i};ToT/code", 512, 0, 511)
-        toas_code[i] = ROOT.TH1F(f"ToA_code{i}", f"Time of Arrival {i};ToA/code", 1024, 0, 1023)
-        # tots range 0 - 3144
-        tots[i] = ROOT.TH1F(f"ToT{i}", f"Time over Threshold {i};ToT/ns", 500, 0, 25) # 0-25
-        # toas range 0 - 3197
-        toas[i] = ROOT.TH1F(f"ToA{i}", f"Time of Arrival {i};ToA/ns", 500, 0, 15) # 0-15
-        cals[i] = ROOT.TH1F(f"Cal{i}", f"Calibration {i};Cal", 1024, 1, 1024)
+    # for i in range(7):
+    #     toas_vs_cal[i] = ROOT.TH2F(f"ToA_vs_Cal{i}", f"Time of Arrival vs Calibration {i};ToA;Cal", 500, 0, 15, 1024, 1, 1024)
+    #     tot_vs_toa[i] = ROOT.TH2F(f"ToT_vs_ToA{i}", f"Time over Threshold vs Time of Arrival {i};ToT;ToA", 500, 0, 15, 500, 0, 25)
+    #     tots_code[i] = ROOT.TH1F(f"ToT_code{i}", f"Time over Threshold {i};ToT/code", 512, 0, 511)
+    #     toas_code[i] = ROOT.TH1F(f"ToA_code{i}", f"Time of Arrival {i};ToA/code", 1024, 0, 1023)
+    #     # tots range 0 - 3144
+    #     tots[i] = ROOT.TH1F(f"ToT{i}", f"Time over Threshold {i};ToT/ns", 500, 0, 25) # 0-25
+    #     # toas range 0 - 3197
+    #     toas[i] = ROOT.TH1F(f"ToA{i}", f"Time of Arrival {i};ToA/ns", 500, 0, 15) # 0-15
+    #     cals[i] = ROOT.TH1F(f"Cal{i}", f"Calibration {i};Cal", 1024, 1, 1024)
 
     for inputfile in inputfiles:
         with open(inputfile) as f:

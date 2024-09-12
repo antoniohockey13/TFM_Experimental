@@ -4,7 +4,7 @@ import click
 import os
 import sifca_utils
 
-# sifca_utils.plotting.set_sifca_style()
+sifca_utils.plotting.set_sifca_style()
 
 
 
@@ -13,10 +13,12 @@ FORMAT = ".pdf"
 save_plots = True
 omit_plots = True
 ROOT.gROOT.SetBatch(omit_plots)
-ROOT.gStyle.SetOptStat(111111)
-# ROOT.gStyle.SetOptStat(0)
+# ROOT.gStyle.SetOptStat(111111)
+ROOT.gStyle.SetOptStat(0)
+
 def plot_hit_map(file, canvas_name, title, file_name, folder, cut=""):
     c = ROOT.TCanvas(canvas_name, canvas_name)
+    c.SetRightMargin(0.2) 
     file.Hits.Draw("col:row>>hit_map(16,0,16,16,0,16)", cut,"colz")
     hit_map = ROOT.gDirectory.Get("hit_map")
     hit_map.GetXaxis().SetTitle("Row")
@@ -67,6 +69,7 @@ def plot_tot_calibrated_full(file, canvas_name, title, file_name, folder, cut=""
         c.SaveAs(f"Pictures/{folder}/{file_name}{FORMAT}")
     if not omit_plots:
         input("Press Enter to continue...")
+
 def plot_toa_code(file, canvas_name, title, file_name, folder, cut=""):
     c = ROOT.TCanvas(canvas_name, canvas_name)
     file.Hits.Draw("toa_code>>toa_code(1025,0,1024)", cut,"")
@@ -82,11 +85,13 @@ def plot_toa_code(file, canvas_name, title, file_name, folder, cut=""):
 
 def plot_toa_calibrated(file, canvas_name, title, file_name, folder, cut=""):
     c = ROOT.TCanvas(canvas_name, canvas_name)
-    file.Hits.Draw("toa_cal>>toa_calibrated(125,0,14)", cut,"")
+    c.SetLeftMargin(0.2)
+    file.Hits.Draw("toa_cal>>toa_calibrated(125,-0.5,14)", cut,"")
     toa_calibrated = ROOT.gDirectory.Get("toa_calibrated")
     toa_calibrated.SetTitle(title)
     toa_calibrated.GetXaxis().SetTitle("ToA/ns")
     toa_calibrated.GetYaxis().SetTitle("Entries")
+    toa_calibrated.GetYaxis().SetTitleOffset(1.5)
     c.Draw()
     if save_plots:
         c.SaveAs(f"Pictures/{folder}/{file_name}{FORMAT}")
@@ -169,26 +174,26 @@ def main(inputfiles):
         file = ROOT.TFile(inputfile)
 
         # Plot functions
-        plot_hit_map(file, "hit_map", f"Hit Map", f"hit_map", folder)
+        # plot_hit_map(file, "hit_map", f"Hit Map", f"hit_map", folder)
         max_bin = []
         for i in range(6,10):
             max_bin.append(plot_cal(file, f"cal{i}", f"Calibration {i}", f"cal_row_{i}", folder, f"row == {i}"))
-            plot_cal_log(file, f"cal{i}", f"Calibration {i}", f"cal_log_row_{i}", folder, f"row == {i}")
+            #plot_cal_log(file, f"cal{i}", f"Calibration {i}", f"cal_log_row_{i}", folder, f"row == {i}")
 
-        for i in range(6,10):
-            plot_tot_code(file, f"tot_code{i}", f"ToT Code {i}", f"tot_code_row_{i}", folder, f"row == {i}")
-        for i in range(6,10):
-            plot_tot_calibrated(file, f"tot_calibrated{i}", f"ToT Calibrated {i}", f"tot_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
-            plot_tot_calibrated_full(file, f"tot_calibrated_full{i}", f"ToT Calibrated Full {i}", f"tot_calibrated_full_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
-        for i in range(6,10):    
-            plot_toa_code(file, f"toa_code{i}", f"ToA Code {i}", f"toa_code_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<1.5 && row == {i}")
+        # for i in range(6,10):
+        #     plot_tot_code(file, f"tot_code{i}", f"ToT Code {i}", f"tot_code_row_{i}", folder, f"row == {i}")
+        # for i in range(6,10):
+        #     plot_tot_calibrated(file, f"tot_calibrated{i}", f"ToT Calibrated {i}", f"tot_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+        #     plot_tot_calibrated_full(file, f"tot_calibrated_full{i}", f"ToT Calibrated Full {i}", f"tot_calibrated_full_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+        # for i in range(6,10):    
+        #     plot_toa_code(file, f"toa_code{i}", f"ToA Code {i}", f"toa_code_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<1.5 && row == {i}")
         for i in range(6,10):    
             plot_toa_calibrated(file, f"toa_calibrated{i}", f"ToA Calibrated {i}", f"toa_calibrated_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
             plot_toa_calibrated(file, f"toa_calibrated{i}", f"ToA Calibrated No Filter {i}", f"toa_calibrated_no_filter_row_{i}", folder, f"row == {i}")
-        for i in range(6,10):
-            plot_tot_toa(file, f"tot_toa{i}", f"ToT vs ToA {i}", f"tot_toa_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
-        for i in range(6,10):
-            plot_toa_calibration(file, f"toa_calibration{i}", f"ToA Calibration {i}", f"toa_calibration_row_{i}", folder, f"row == {i}")
+        # for i in range(6,10):
+        #     plot_tot_toa(file, f"tot_toa{i}", f"ToT vs ToA {i}", f"tot_toa_row_{i}", folder, f"abs(cal-{max_bin[i-6]})<2.5 && row == {i}")
+        # for i in range(6,10):
+        #     plot_toa_calibration(file, f"toa_calibration{i}", f"ToA Calibration {i}", f"toa_calibration_row_{i}", folder, f"row == {i}")
         
 
         file.Close()
